@@ -20,6 +20,7 @@ public:
 	UStatusAttributeSet();
 
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+	// Instant 타입의 이팩트가 적용된 직후에만 호출
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")

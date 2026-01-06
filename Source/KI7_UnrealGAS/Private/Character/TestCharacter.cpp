@@ -4,8 +4,11 @@
 #include "Character/TestCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "GameAbilitySystem/StatusAttributeSet.h"
+#include "GameAbilitySystem/StatAttributeSet.h"
 #include "Components/WidgetComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Interface/TwinResource.h"
+#include "GameplayEffect.h"
 
 // Sets default values
 ATestCharacter::ATestCharacter()
@@ -20,6 +23,7 @@ ATestCharacter::ATestCharacter()
 
 	// 어트리뷰트 셋 생성
 	StatusAttributeSet = CreateDefaultSubobject<UStatusAttributeSet>(TEXT("Status"));
+	StatAttributeSet = CreateDefaultSubobject<UStatAttributeSet>(TEXT("Stat"));
 }
 
 void ATestCharacter::TestHealthChange(float Amount)
@@ -28,6 +32,74 @@ void ATestCharacter::TestHealthChange(float Amount)
 	{
 		float CurrentValue = StatusAttributeSet->GetHealth();
 		StatusAttributeSet->SetHealth(CurrentValue + Amount);
+	}
+}
+
+void ATestCharacter::TestSetByCaller(float InAmount)
+{
+	if (AbilitySystemComponent)
+	{
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(TestEffectClass, 0, EffectContext);
+
+		if (SpecHandle.IsValid())
+		{
+			SpecHandle.Data->SetSetByCallerMagnitude(Tag_EffectDamage, InAmount);
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		}
+	}
+}
+
+void ATestCharacter::TestAddInfiniteEffect()
+{
+	if (TestInfiniteEffectClass && AbilitySystemComponent)
+	{
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		EffectContext.AddInstigator(this, this);
+
+		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(TestInfiniteEffectClass, 0, EffectContext);
+		if (SpecHandle.IsValid())
+		{
+			TestInfinite = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		}
+	}
+}
+
+void ATestCharacter::TestRemoveInfiniteEffect()
+{
+	if (TestInfinite.IsValid())
+	{
+		AbilitySystemComponent->RemoveActiveGameplayEffect(TestInfinite);
+	}
+}
+
+void ATestCharacter::TestSetMoveSpeedEffect()
+{
+	if (MoveSpeedEffectClass && AbilitySystemComponent)
+	{
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		EffectContext.AddInstigator(this, this);
+
+		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(MoveSpeedEffectClass, 0, EffectContext);
+		if (SpecHandle.IsValid())
+		{
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		}
+	}
+}
+
+void ATestCharacter::TestSetJumpPowerEffect()
+{
+	if (JumpPowerEffectClass && AbilitySystemComponent)
+	{
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		EffectContext.AddInstigator(this, this);
+
+		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(JumpPowerEffectClass, 0, EffectContext);
+		if (SpecHandle.IsValid())
+		{
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		}
 	}
 }
 
@@ -43,9 +115,23 @@ void ATestCharacter::BeginPlay()
 		// 초기화 이후에만 가능
 		FOnGameplayAttributeValueChange& onHealthChange =
 			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UStatusAttributeSet::GetHealthAttribute());
-
 		onHealthChange.AddUObject(this, &ATestCharacter::OnHealthChange);	// Health가 변경되었을 때 실행될 함수 바인딩
-			
+
+		FOnGameplayAttributeValueChange& onManaChange =
+			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UStatusAttributeSet::GetManaAttribute());
+		onManaChange.AddUObject(this, &ATestCharacter::OnManaChange);	// Mana가 변경되었을 때 실행될 함수 바인딩
+
+		FOnGameplayAttributeValueChange& onMaxHealthChange =
+			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UStatusAttributeSet::GetMaxHealthAttribute());
+		onMaxHealthChange.AddUObject(this, &ATestCharacter::OnMaxHealthChange);	// Mana가 변경되었을 때 실행될 함수 바인딩
+
+		FOnGameplayAttributeValueChange& onMoveSpeedChange =
+			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UStatAttributeSet::GetMoveSpeedAttribute());
+		onMoveSpeedChange.AddUObject(this, &ATestCharacter::OnMoveSpeedChange);
+
+		FOnGameplayAttributeValueChange& onJumpPowerChange =
+			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UStatAttributeSet::GetJumpPowerAttribute());
+		onJumpPowerChange.AddUObject(this, &ATestCharacter::OnJumpPowerChange);
 	}
 
 	if (StatusAttributeSet)
@@ -59,21 +145,27 @@ void ATestCharacter::BeginPlay()
 
 				ITwinResource::Execute_UpdateMaxMana(BarWigetComponent->GetWidget(), StatusAttributeSet->GetMaxMana());
 				ITwinResource::Execute_UpdateCurrentMana(BarWigetComponent->GetWidget(), StatusAttributeSet->GetMana());
+
+				ITwinResource::Execute_UpdateMaxHealth(BarWigetComponent->GetWidget(), StatusAttributeSet->GetMaxHealth());
 			}
 		}
 		//StatusAttributeSet->Health = 50.0f;	// 절대 안됨
 		//StatusAttributeSet->SetHealth(50.0f);	// 무조건 Setter로 변경해야 한다.
 	}
+
+	Tag_EffectDamage = FGameplayTag::RequestGameplayTag(FName("Effect.Damage"));
 }
 
 // Called every frame
 void ATestCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	FString healthString = FString::Printf(TEXT("%.1f / %.1f"), 
-		StatusAttributeSet->GetHealth(), StatusAttributeSet->GetMaxHealth());	
-	DrawDebugString(GetWorld(), GetActorLocation(), healthString, nullptr, FColor::White, 0, true);
+	if (StatusAttributeSet)
+	{
+		FString healthString = FString::Printf(TEXT("%.1f / %.1f"),
+			StatusAttributeSet->GetHealth(), StatusAttributeSet->GetMaxHealth());
+		DrawDebugString(GetWorld(), GetActorLocation(), healthString, nullptr, FColor::White, 0, true);
+	}
 }
 
 // Called to bind functionality to input
@@ -93,5 +185,33 @@ void ATestCharacter::OnManaChange(const FOnAttributeChangeData& InData)
 {
 	UE_LOG(LogTemp, Log, TEXT("On Mana Change : %.1f -> %.1f"), InData.OldValue, InData.NewValue);
 	ITwinResource::Execute_UpdateCurrentMana(BarWigetComponent->GetWidget(), StatusAttributeSet->GetMana());
+}
+
+void ATestCharacter::OnMaxHealthChange(const FOnAttributeChangeData& InData)
+{
+	UE_LOG(LogTemp, Log, TEXT("On Max Health Change : %.1f -> %.1f"), InData.OldValue, InData.NewValue);
+	ITwinResource::Execute_UpdateMaxHealth(BarWigetComponent->GetWidget(), StatusAttributeSet->GetMaxHealth());
+	//StatusAttributeSet->SetHealth(StatusAttributeSet->GetHealth());
+}
+
+void ATestCharacter::OnMoveSpeedChange(const FOnAttributeChangeData& InData)
+{
+	UE_LOG(LogTemp, Log, TEXT("On Move Speed Change : %.1f -> %.1f"), InData.OldValue, InData.NewValue);
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		// InData.NewValue가 곧 MoveSpeed 어트리뷰트 값
+		const float NewSpeed = FMath::Max(0.f, InData.NewValue);
+		MoveComp->MaxWalkSpeed = NewSpeed;
+	}
+}
+
+void ATestCharacter::OnJumpPowerChange(const FOnAttributeChangeData& InData)
+{
+	UE_LOG(LogTemp, Log, TEXT("On OnJumpPowerChange Change : %.1f -> %.1f"), InData.OldValue, InData.NewValue);
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		// JumpPower를 JumpZVelocity로 그대로 사용
+		MoveComp->JumpZVelocity = FMath::Max(0.f, InData.NewValue);
+	}
 }
 

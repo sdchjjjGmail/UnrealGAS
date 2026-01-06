@@ -34,6 +34,14 @@ public:
 	FGameplayAttributeData Inteligence;
 	ATTRIBUTE_ACCESSORS(UStatAttributeSet, Inteligence)
 
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData MoveSpeed;
+	ATTRIBUTE_ACCESSORS(UStatAttributeSet, MoveSpeed)
+
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData JumpPower;
+	ATTRIBUTE_ACCESSORS(UStatAttributeSet, JumpPower)
+
 private:
 	float BasicStatValue = 5.0f;
 };

@@ -9,6 +9,9 @@ UStatAttributeSet::UStatAttributeSet()
 	InitStrengh(BasicStatValue);
 	InitAgility(BasicStatValue);
 	InitInteligence(BasicStatValue);
+
+	InitMoveSpeed(500.0f);
+	InitJumpPower(1000.0f);
 }
 
 void UStatAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)

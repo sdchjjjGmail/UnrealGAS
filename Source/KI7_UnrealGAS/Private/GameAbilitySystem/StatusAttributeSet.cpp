@@ -15,15 +15,29 @@ UStatusAttributeSet::UStatusAttributeSet()
 void UStatusAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	// 값 검증 및 제한(Clamp) 용도. 순수한 수학적 처리 용도.
-
 	Super::PreAttributeChange(Attribute, NewValue);
 
 	if (Attribute == GetHealthAttribute())	// 이 함수가 Health 어트리뷰트가 변경되어서 호출되었는지 확인
 	{
+		UE_LOG(LogTemp, Log, TEXT("NewValue : %.1f"), NewValue);
+
 		// 최대 체력을 넘지 않게 하기
 		// 체력이 음수가 되지 않게 하기
 		NewValue = FMath::Clamp(NewValue, 0.0f, GetMaxHealth());
-		//UE_LOG(LogTemp, Log, TEXT("Health가 변경되었다 (%.1f -> %.1f)"), GetHealth(), NewValue);
+		UE_LOG(LogTemp, Log, TEXT("Health가 변경되었다 (%.1f -> %.1f)"), GetHealth(), NewValue);
+	}
+	else if (Attribute == GetMaxHealthAttribute())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Max Health가 변경되었다 (%.1f -> %.1f)"), GetHealth(), NewValue);
+		if (NewValue < GetHealth())
+		{
+			UAbilitySystemComponent* AbilityComp = GetOwningAbilitySystemComponentChecked();
+			AbilityComp->ApplyModToAttribute(GetHealthAttribute(), EGameplayModOp::Override, NewValue);
+		}
+	}
+	else if (Attribute == GetManaAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.0f, GetMaxMana());
 	}
 }
 
@@ -37,10 +51,20 @@ void UStatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 		UE_LOG(LogTemp, Log, TEXT("현재 Health : %.1f"), GetHealth());
 		// 채력 변화 로직 호출
 
+		SetHealth(FMath::Clamp(GetHealth(), 0.0f, GetMaxHealth()));
+
 		if (GetHealth() <= 0.0f)
 		{
 			UE_LOG(LogTemp, Log, TEXT("사망"));
 			// 캐릭터 사망처리 로직 호출
 		}
+	}
+	else if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
+	{
+		UE_LOG(LogTemp, Log, TEXT("MaxHealth : SetHealth"));
+	}
+	else if (Data.EvaluatedData.Attribute == GetManaAttribute())
+	{
+		SetMana(FMath::Clamp(GetMana(), 0.0f, GetMaxMana()));
 	}
 }

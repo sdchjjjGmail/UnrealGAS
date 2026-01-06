@@ -9,7 +9,9 @@
 #include "TestCharacter.generated.h"
 
 class UStatusAttributeSet;
+class UStatAttributeSet;
 class UWidgetComponent;
+class UGameplayEffect;
 
 UCLASS()
 class KI7_UNREALGAS_API ATestCharacter : public ACharacter, public IAbilitySystemInterface
@@ -27,6 +29,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TestHealthChange(float Amount);
 
+	UFUNCTION(BlueprintCallable)
+	void TestSetByCaller(float InAmount);
+
+	UFUNCTION(BlueprintCallable)
+	void TestAddInfiniteEffect();
+
+	UFUNCTION(BlueprintCallable)
+	void TestRemoveInfiniteEffect();
+
+	UFUNCTION(BlueprintCallable)
+	void TestSetMoveSpeedEffect();
+
+	UFUNCTION(BlueprintCallable)
+	void TestSetJumpPowerEffect();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -35,10 +52,26 @@ protected:
 private:
 	void OnHealthChange(const FOnAttributeChangeData& InData);
 	void OnManaChange(const FOnAttributeChangeData& InData);
+	void OnMaxHealthChange(const FOnAttributeChangeData& InData);
+
+	void OnMoveSpeedChange(const FOnAttributeChangeData& InData);
+	void OnJumpPowerChange(const FOnAttributeChangeData& InData);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
 	float TestValue = 10.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
+	TSubclassOf<class UGameplayEffect> TestEffectClass = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
+	TSubclassOf<class UGameplayEffect> TestInfiniteEffectClass = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
+	TSubclassOf<class UGameplayEffect> MoveSpeedEffectClass = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
+	TSubclassOf<class UGameplayEffect> JumpPowerEffectClass = nullptr;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ability")
@@ -50,4 +83,11 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<UStatusAttributeSet> StatusAttributeSet = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UStatAttributeSet> StatAttributeSet = nullptr;
+
+	FGameplayTag Tag_EffectDamage;
+
+	FActiveGameplayEffectHandle TestInfinite;
 };
