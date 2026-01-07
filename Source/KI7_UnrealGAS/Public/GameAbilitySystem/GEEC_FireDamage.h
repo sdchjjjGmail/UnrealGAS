@@ -26,13 +26,18 @@ protected:
 	float MinimumDamage = 1.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CustomData")
-	float DamageMultiplier = 2.f;
+	float CriticalDamageMultiplier = 2.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CustomData")
 	TObjectPtr<UCurveTable> DamageTable = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CustomData")
+	TObjectPtr<UCurveTable> DamageMultiplierTable = nullptr;
+
 private:
 	FGameplayTag Tag_DebuffBurn;
 	FGameplayTag Tag_ElementFire;
-	FGameplayTag Tag_DataDamage;
+
+	FGameplayTag Tag_DebuffFrozen;
+	FGameplayTag Tag_ElementIce;
 };

@@ -19,16 +19,16 @@ void UStatusAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute
 
 	if (Attribute == GetHealthAttribute())	// 이 함수가 Health 어트리뷰트가 변경되어서 호출되었는지 확인
 	{
-		UE_LOG(LogTemp, Log, TEXT("NewValue : %.1f"), NewValue);
+		//UE_LOG(LogTemp, Log, TEXT("NewValue : %.1f"), NewValue);
 
 		// 최대 체력을 넘지 않게 하기
 		// 체력이 음수가 되지 않게 하기
 		NewValue = FMath::Clamp(NewValue, 0.0f, GetMaxHealth());
-		UE_LOG(LogTemp, Log, TEXT("Health가 변경되었다 (%.1f -> %.1f)"), GetHealth(), NewValue);
+		//UE_LOG(LogTemp, Log, TEXT("Health가 변경되었다 (%.1f -> %.1f)"), GetHealth(), NewValue);
 	}
 	else if (Attribute == GetMaxHealthAttribute())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Max Health가 변경되었다 (%.1f -> %.1f)"), GetHealth(), NewValue);
+		//UE_LOG(LogTemp, Log, TEXT("Max Health가 변경되었다 (%.1f -> %.1f)"), GetHealth(), NewValue);
 		if (NewValue < GetHealth())
 		{
 			UAbilitySystemComponent* AbilityComp = GetOwningAbilitySystemComponentChecked();
@@ -48,7 +48,7 @@ void UStatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())	// Health를 변경시키는 이팩트가 실행된 후에 호출되었는지 확인
 	{
-		UE_LOG(LogTemp, Log, TEXT("현재 Health : %.1f"), GetHealth());
+		//UE_LOG(LogTemp, Log, TEXT("현재 Health : %.1f"), GetHealth());
 		// 채력 변화 로직 호출
 
 		SetHealth(FMath::Clamp(GetHealth(), 0.0f, GetMaxHealth()));
@@ -61,7 +61,7 @@ void UStatusAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 	}
 	else if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
 	{
-		UE_LOG(LogTemp, Log, TEXT("MaxHealth : SetHealth"));
+		//UE_LOG(LogTemp, Log, TEXT("MaxHealth : SetHealth"));
 	}
 	else if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{
