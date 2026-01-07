@@ -48,6 +48,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TestAbility();
 
+	UFUNCTION(BlueprintCallable)
+	void TestSuperJumpAbility();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -79,6 +82,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability")
 	TSubclassOf<UGameplayAbility> HasteClass = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability")
+	TSubclassOf<UGameplayAbility> SuperJumpClass = nullptr;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ability")

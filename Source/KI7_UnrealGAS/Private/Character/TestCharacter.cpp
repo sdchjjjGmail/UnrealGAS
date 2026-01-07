@@ -112,6 +112,15 @@ void ATestCharacter::TestAbility()
 	}
 }
 
+void ATestCharacter::TestSuperJumpAbility()
+{
+	if (AbilitySystemComponent && SuperJumpClass)
+	{
+		// 클래스로 어빌리티 발동시키기
+		AbilitySystemComponent->TryActivateAbilityByClass(SuperJumpClass);
+	}
+}
+
 // Called when the game starts or when spawned
 void ATestCharacter::BeginPlay()
 {
@@ -126,6 +135,18 @@ void ATestCharacter::BeginPlay()
 			AbilitySystemComponent->GiveAbility(
 				FGameplayAbilitySpec(
 					HasteClass, // 어빌리티 클래스
+					1, // 레벨
+					-1, // 입력 ID
+					this // 소스
+				)
+			);
+		}
+
+		if (SuperJumpClass)
+		{
+			AbilitySystemComponent->GiveAbility(
+				FGameplayAbilitySpec(
+					SuperJumpClass, // 어빌리티 클래스
 					1, // 레벨
 					-1, // 입력 ID
 					this // 소스
