@@ -50,9 +50,5 @@ protected:
 	TObjectPtr<class UBoxComponent> TrigerArea = nullptr;
 
 private:
-	UPROPERTY()
-	UAbilitySystemComponent* TargetASC = nullptr;
-
-	FActiveGameplayEffectHandle EffectHandle;
-
+	TMap<class UAbilitySystemComponent*, FActiveGameplayEffectHandle> ActiveEffectHandles;
 };
