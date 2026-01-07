@@ -6,8 +6,8 @@
 
 UStatusAttributeSet::UStatusAttributeSet()
 {
-	InitMaxHealth(100.0f);
-	InitHealth(100.0f);
+	InitMaxHealth(300.0f);
+	InitHealth(300.0f);
 	InitMaxMana(100.0f);
 	InitMana(100.0f);
 }
