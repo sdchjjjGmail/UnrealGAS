@@ -12,6 +12,7 @@ class UStatusAttributeSet;
 class UStatAttributeSet;
 class UWidgetComponent;
 class UGameplayEffect;
+class UGameplayAbility;
 
 UCLASS()
 class KI7_UNREALGAS_API ATestCharacter : public ACharacter, public IAbilitySystemInterface
@@ -44,6 +45,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TestSetJumpPowerEffect();
 
+	UFUNCTION(BlueprintCallable)
+	void TestAbility();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -72,6 +76,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
 	TSubclassOf<class UGameplayEffect> JumpPowerEffectClass = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability")
+	TSubclassOf<UGameplayAbility> HasteClass = nullptr;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ability")
