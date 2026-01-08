@@ -9,6 +9,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interface/TwinResource.h"
 #include "GameplayEffect.h"
+#include "EnhancedInputComponent.h"
+#include "Utils/AbilityEnums.h"
 
 // Sets default values
 ATestCharacter::ATestCharacter()
@@ -136,7 +138,7 @@ void ATestCharacter::BeginPlay()
 				FGameplayAbilitySpec(
 					HasteClass, // 어빌리티 클래스
 					1, // 레벨
-					-1, // 입력 ID
+					static_cast<int32>(EAbilityInputID::Haste), // 입력 ID
 					this // 소스
 				)
 			);
@@ -148,7 +150,19 @@ void ATestCharacter::BeginPlay()
 				FGameplayAbilitySpec(
 					SuperJumpClass, // 어빌리티 클래스
 					1, // 레벨
-					-1, // 입력 ID
+					static_cast<int32>(EAbilityInputID::SuperJump), // 입력 ID
+					this // 소스
+				)
+			);
+		}
+
+		if (ChargeDashClass)
+		{
+			AbilitySystemComponent->GiveAbility(
+				FGameplayAbilitySpec(
+					ChargeDashClass, // 어빌리티 클래스
+					1, // 레벨
+					static_cast<int32>(EAbilityInputID::ChargeDash), // 입력 ID
 					this // 소스
 				)
 			);
@@ -171,9 +185,9 @@ void ATestCharacter::BeginPlay()
 			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UStatAttributeSet::GetMoveSpeedAttribute());
 		onMoveSpeedChange.AddUObject(this, &ATestCharacter::OnMoveSpeedChange);
 
-		FOnGameplayAttributeValueChange& onJumpPowerChange =
-			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UStatAttributeSet::GetJumpPowerAttribute());
-		onJumpPowerChange.AddUObject(this, &ATestCharacter::OnJumpPowerChange);
+		//FOnGameplayAttributeValueChange& onJumpPowerChange =
+		//	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UStatAttributeSet::GetJumpPowerAttribute());
+		//onJumpPowerChange.AddUObject(this, &ATestCharacter::OnJumpPowerChange);
 	}
 
 	if (StatusAttributeSet)
@@ -215,6 +229,17 @@ void ATestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	if (EnhancedInput)
+	{
+		EnhancedInput->BindAction(IA_Ability01, ETriggerEvent::Started, this, &ATestCharacter::OnAbility01Press);
+
+		EnhancedInput->BindAction(IA_Ability02, ETriggerEvent::Started, this, &ATestCharacter::OnAbility02Press);
+		EnhancedInput->BindAction(IA_Ability02, ETriggerEvent::Completed, this, &ATestCharacter::OnAbility02Release);
+
+		EnhancedInput->BindAction(IA_AbilityDash, ETriggerEvent::Started, this, &ATestCharacter::OnAbilityDashPress);
+		EnhancedInput->BindAction(IA_AbilityDash, ETriggerEvent::Completed, this, &ATestCharacter::OnAbilityDashRelease);
+	}
 }
 
 void ATestCharacter::OnHealthChange(const FOnAttributeChangeData& InData)
@@ -247,13 +272,58 @@ void ATestCharacter::OnMoveSpeedChange(const FOnAttributeChangeData& InData)
 	}
 }
 
-void ATestCharacter::OnJumpPowerChange(const FOnAttributeChangeData& InData)
+//void ATestCharacter::OnJumpPowerChange(const FOnAttributeChangeData& InData)
+//{
+//	UE_LOG(LogTemp, Log, TEXT("On OnJumpPowerChange Change : %.1f -> %.1f"), InData.OldValue, InData.NewValue);
+//	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+//	{
+//		// JumpPower를 JumpZVelocity로 그대로 사용
+//		//MoveComp->JumpZVelocity = FMath::Max(0.f, InData.NewValue);
+//	}
+//}
+
+void ATestCharacter::OnAbility01Press()
 {
-	UE_LOG(LogTemp, Log, TEXT("On OnJumpPowerChange Change : %.1f -> %.1f"), InData.OldValue, InData.NewValue);
-	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	UE_LOG(LogTemp, Log, TEXT("OnAbility01Press"));
+	if (AbilitySystemComponent)
 	{
-		// JumpPower를 JumpZVelocity로 그대로 사용
-		MoveComp->JumpZVelocity = FMath::Max(0.f, InData.NewValue);
+		AbilitySystemComponent->AbilityLocalInputPressed(static_cast<int32>(EAbilityInputID::Haste));
 	}
 }
 
+void ATestCharacter::OnAbility02Press()
+{
+	UE_LOG(LogTemp, Log, TEXT("OnAbility02Press"));
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->AbilityLocalInputPressed(static_cast<int32>(EAbilityInputID::SuperJump));
+		//TestSuperJumpAbility();
+	}
+}
+
+void ATestCharacter::OnAbility02Release()
+{
+	UE_LOG(LogTemp, Log, TEXT("OnAbility02Completed"));
+
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->AbilityLocalInputReleased(static_cast<int32>(EAbilityInputID::SuperJump));
+	}
+}
+
+void ATestCharacter::OnAbilityDashPress()
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->AbilityLocalInputPressed(static_cast<int32>(EAbilityInputID::ChargeDash));
+
+	}
+}
+
+void ATestCharacter::OnAbilityDashRelease()
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->AbilityLocalInputReleased(static_cast<int32>(EAbilityInputID::ChargeDash));
+	}
+}

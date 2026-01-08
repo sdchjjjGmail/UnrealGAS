@@ -62,7 +62,16 @@ private:
 	void OnMaxHealthChange(const FOnAttributeChangeData& InData);
 
 	void OnMoveSpeedChange(const FOnAttributeChangeData& InData);
-	void OnJumpPowerChange(const FOnAttributeChangeData& InData);
+	//void OnJumpPowerChange(const FOnAttributeChangeData& InData);
+
+	void OnAbility01Press();
+
+	void OnAbility02Press();
+	void OnAbility02Release();
+
+	void OnAbilityDashPress();
+	void OnAbilityDashRelease();
+
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
@@ -86,12 +95,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability")
 	TSubclassOf<UGameplayAbility> SuperJumpClass = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability")
+	TSubclassOf<UGameplayAbility> ChargeDashClass = nullptr;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ability")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<UWidgetComponent> BarWigetComponent = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<class UInputAction> IA_Ability01 = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Ability02 = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_AbilityDash = nullptr;
 	
 private:
 	UPROPERTY()
