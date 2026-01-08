@@ -4,6 +4,7 @@
 #include "GameAbilitySystem/Cue/GCNS_Test.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Character/Test/TestPawn.h"
 
 UGCNS_Test::UGCNS_Test()
 {

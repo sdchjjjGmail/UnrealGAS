@@ -123,6 +123,11 @@ void ATestCharacter::TestSuperJumpAbility()
 	}
 }
 
+USkeletalMeshComponent* ATestCharacter::GetMySkeletalMesh()
+{
+	return GetMesh();
+}
+
 // Called when the game starts or when spawned
 void ATestCharacter::BeginPlay()
 {

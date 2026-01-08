@@ -51,6 +51,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TestSuperJumpAbility();
 
+	USkeletalMeshComponent* GetMySkeletalMesh();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

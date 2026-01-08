@@ -20,6 +20,10 @@ public:
 		return AbilitySystemComponent;
 	};
 
+	inline USceneComponent* GetSceneComponent() {
+		return VfsLocation;
+	}
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -34,6 +38,9 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<USceneComponent> VfsLocation = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UStaticMeshComponent> MyMesh = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ability")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent = nullptr;

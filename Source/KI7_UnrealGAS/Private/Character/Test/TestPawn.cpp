@@ -9,8 +9,11 @@ ATestPawn::ATestPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
+	MyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 
 	VfsLocation = CreateDefaultSubobject<USceneComponent>(TEXT("VfsLocation"));
+	VfsLocation->SetupAttachment(MyMesh);
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("ASC"));
 }
